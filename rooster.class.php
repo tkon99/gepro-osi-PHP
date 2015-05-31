@@ -47,7 +47,7 @@ class rooster{
 		return $return;
 	}
 
-	public function getSections(){ // Richtingen (e.g. Vwo4)
+	public function getSections(){ // Richtingen (e.g. Vwo 4)
 		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster";
 		$html = file_get_html($url);
 		$return = array();
@@ -55,6 +55,13 @@ class rooster{
 			$return[] = $richting->plaintext;
 		}
 		return $return;
+	}
+
+	public function getNotes(){ // Geeft notities onder het rooster terug
+		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school;
+		$html = file_get_html($url);
+		$notes = $html->find(".Remark");
+		return trim(preg_replace('/(<br>)+$/', '', $notes[0]->innertext)); // Remove line breaks at the end
 	}
 
 	/*
@@ -81,7 +88,7 @@ class rooster{
 		$parts = explode(" ", $name);
 		$klas = array_shift($parts);
 		array_shift($parts);
-		return implode(" ", $parts);
+		return trim(implode(" ", $parts));
 	}
 
 	// Used to strip groups from name on schedule
@@ -89,7 +96,7 @@ class rooster{
 		$parts = explode(" ", $name);
 		$klas = array_pop($parts);
 		array_pop($parts);
-		return implode(" ", $parts);
+		return trim(implode(" ", $parts));
 	}
 
 	/*
@@ -142,7 +149,7 @@ class rooster{
 	public function getName($url){
 		$html = file_get_html($url);
 		$naam = $html->find('.lNameHeader');
-		return $this->getNameSchedule($naam->plaintext);
+		return $this->getNameSchedule($naam[0]->plaintext);
 	}
 
 	public function getSchedule($url){
@@ -175,11 +182,42 @@ class rooster{
 					$status_txt = 'normaal';
 				}
 
-				$table[$x][$hour] = array("vak"=>$vak->plaintext, "lokaal"=>$lokaal->plaintext, "leraar"=>$leraar->plaintext, "cluster"=>$cluster->plaintext, "status"=>array("type"=>$status, "text"=>$status_txt));
+				$table[$x][$hour] = array(
+					"vak"=>$vak->plaintext,
+					"lokaal"=>$lokaal->plaintext,
+					"leraar"=>$leraar->plaintext,
+					"cluster"=>$cluster->plaintext,
+					"status"=>array(
+						"type"=>$status,
+						"text"=>$status_txt
+						)
+					);
 			}
 		}
 
 		return $table;
+	}
+
+	/*
+	*	Extra functionality functions (swag)
+	*/
+
+	// This basicaly brute forces all sections until a name is found
+	public function getSectionFromNumber($number = false){
+		if($number == false){
+			throw new Exception("getSectionFromNumber needs a number as it's parameter.", 1);
+		}else{
+			$sections = $this->getSections();
+			$found = false;
+			foreach($sections as $section){
+				$naam = $this->getName($this->getUrl("leerling", $section, $number));
+				if(!empty($naam)){
+					$found = $section;
+					break;
+				}
+			}
+			return $found;
+		}
 	}
 }
 ?>
