@@ -7,6 +7,8 @@ class rooster{
 	private $school = 507;
 	private $hours = 10;
 
+	private $cells = 6; //Amount of cells per hour
+
 	public function __construct($school = 507, $hours = 10){
 		$this->school = 507;
 		$this->hours = 10;
@@ -164,25 +166,31 @@ class rooster{
 
 				$uur = $roostertable[$i];
 				$data = $uur->find('tr td');
-				$leraar = $data[0];
-				$lokaal = $data[2];
-				$vak = $data[4];
-				$cluster = $data[5];
 
-				$class = $leraar->class;
-				$status_txt = "";
-				$status = 0;					//1: wijziging, 2: uitval, 0: normaal
-				if($class == 'tableCellNew'){
-					$status_txt = 'wijziging';
-					$status = 1;
-				}else if($class == 'tableCellRemoved'){
-					$status_txt = 'uitval';
-					$status = 2;
-				}else{
-					$status_txt = 'normaal';
-				}
+				$hours = count($data)/$this->cells;
 
-				$table[$x][$hour] = array(
+				for($h = 1; $h <= $hours; $h++){
+					$maxIndex = $h*$this->cells;
+
+					$leraar = $data[$maxIndex - $this->cells];
+					$lokaal = $data[$maxIndex - $this->cells + 2];
+					$vak = $data[$maxIndex - $this->cells + 4];
+					$cluster = $data[$maxIndex - $this->cells + 5];
+
+					$class = $leraar->class;
+					$status_txt = "";
+					$status = 0;					//1: wijziging, 2: uitval, 0: normaal
+					if($class == 'tableCellNew'){
+						$status_txt = 'wijziging';
+						$status = 1;
+					}else if($class == 'tableCellRemoved'){
+						$status_txt = 'uitval';
+						$status = 2;
+					}else{
+						$status_txt = 'normaal';
+					}
+
+					$table[$x][$hour][$h-1] = array(
 					"vak"=>$vak->plaintext,
 					"lokaal"=>$lokaal->plaintext,
 					"leraar"=>$leraar->plaintext,
@@ -192,6 +200,9 @@ class rooster{
 						"text"=>$status_txt
 						)
 					);
+
+				}
+
 			}
 		}
 
