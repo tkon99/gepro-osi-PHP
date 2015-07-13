@@ -10,8 +10,8 @@ class rooster{
 	private $cells = 6; //Amount of cells per hour
 
 	public function __construct($school = 507, $hours = 10){
-		$this->school = 507;
-		$this->hours = 10;
+		$this->school = $school;
+		$this->hours = $hours;
 		return true;
 	}
 
@@ -70,7 +70,7 @@ class rooster{
 	*	Student functions
 	*/
 
-	public function getStudents($section){ // Leerling uit bepaalde richting
+	public function getStudents($section){ // Leerlingen uit bepaalde richting
 		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster&afdeling=".urlencode($section);
 		$html = file_get_html($url);
 		$students = array();
