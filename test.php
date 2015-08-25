@@ -3,6 +3,11 @@ include("rooster.class.php");
 $rooster = new rooster();
 ?>
 <h1>Gepro-osi API demo</h1>
+<b>Rooster laatst aangepast op: 
+<?php 
+	$lastEdit = $rooster->getLastEdit();
+	echo($lastEdit->format('d-m-Y H:i:s'));
+?></b>
 <h2>Klassen:</h2>
 <?php
 var_dump($rooster->getGroups());

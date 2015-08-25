@@ -19,6 +19,16 @@ class rooster{
 	*	Generic functions, no parameters required
 	*/
 
+	public function getLastEdit(){
+		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
+		$html = file_get_html($url);
+		$datum = $html->find('font[class=fntprompt]');
+		$datum = explode(' ', str_replace("&nbsp;", "", $datum[0]->plaintext));
+		array_shift($datum); array_shift($datum);
+		$date = new DateTime(implode(' ', $datum), new DateTimeZone('Europe/Amsterdam'));
+		return $date;
+	}
+
 	public function getGroups(){ // Klassen
 		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
 		$html = file_get_html($url);
