@@ -19,9 +19,19 @@ class rooster{
 	*	Generic functions, no parameters required
 	*/
 
+	private function file_get_html($url){
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		$output = curl_exec($ch);
+		curl_close($ch);
+		$html = new simple_html_dom();
+		return $html->load($output);
+	}
+
 	public function getLastEdit(){
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
+		$html = $this->file_get_html($url);
 		$datum = $html->find('font[class=fntprompt]');
 		$datum = explode(' ', str_replace("&nbsp;", "", $datum[0]->plaintext));
 		array_shift($datum); array_shift($datum);
@@ -30,8 +40,8 @@ class rooster{
 	}
 
 	public function getGroups(){ // Klassen
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Klasrooster";
+		$html = $this->file_get_html($url);
 		$return = array();
 		foreach($html->find('option') as $klas){
 			$return[] = $klas->plaintext;
@@ -40,8 +50,8 @@ class rooster{
 	}
 
 	public function getTeachers(){ // Leraren
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Docentrooster";
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Docentrooster";
+		$html = $this->file_get_html($url);
 		$return = array();
 		foreach($html->find('option') as $docent){
 			$return[] = $docent->plaintext;
@@ -50,8 +60,8 @@ class rooster{
 	}
 
 	public function getRooms(){ // Lokalen
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Lokaalrooster";
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Lokaalrooster";
+		$html = $this->file_get_html($url);
 		$return = array();
 		foreach($html->find('option') as $lokaal){
 			$return[] = $lokaal->plaintext;
@@ -60,8 +70,8 @@ class rooster{
 	}
 
 	public function getSections(){ // Richtingen (e.g. Vwo 4)
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster";
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster";
+		$html = $this->file_get_html($url);
 		$return = array();
 		foreach($html->find('option') as $richting){
 			$return[] = $richting->plaintext;
@@ -70,8 +80,8 @@ class rooster{
 	}
 
 	public function getNotes(){ // Geeft notities onder het rooster terug
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school;
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school;
+		$html = $this->file_get_html($url);
 		$notes = $html->find(".Remark");
 		return trim(preg_replace('/(<br>)+$/', '', $notes[0]->innertext)); // Remove line breaks at the end
 	}
@@ -81,8 +91,8 @@ class rooster{
 	*/
 
 	public function getStudents($section){ // Leerlingen uit bepaalde richting
-		$url = "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster&afdeling=".urlencode($section);
-		$html = file_get_html($url);
+		$url = "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster&afdeling=".urlencode($section);
+		$html = $this->file_get_html($url);
 		$students = array();
 		$numbers = array();
 		foreach($html->find('option') as $leerling){
@@ -127,28 +137,28 @@ class rooster{
 				if($second !== false && $third !== false){
 					// Second = section
 					// Third = number (id)
-					return "http://roosters5.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster&afdeling=".urlencode($second)."&leerling=".urlencode($third);
+					return "https://publish.gepro-osi.nl/roosters/rooster.php?school=".$this->school."&wijzigingen=1&type=Leerlingrooster&afdeling=".urlencode($second)."&leerling=".urlencode($third);
 				}else{
 					throw new Exception("getUrl needs more parameters.", 1);	
 				}
 			}else if(strtolower($type) == "klas"){
 				if($second !== false){
 					// Second = group
-					return "http://roosters5.gepro-osi.nl/roosters/rooster.php?type=Klasrooster&wijzigingen=1&school=".$this->school."&klassen%5B%5D=".urlencode($second);
+					return "https://publish.gepro-osi.nl/roosters/rooster.php?type=Klasrooster&wijzigingen=1&school=".$this->school."&klassen%5B%5D=".urlencode($second);
 				}else{
 					throw new Exception("getUrl needs more parameters.", 1);	
 				}
 			}else if(strtolower($type) == "docent"){
 				if($second !== false){
 					// Second = teacher code
-					return "http://roosters5.gepro-osi.nl/roosters/rooster.php?type=Docentrooster&wijzigingen=1&school=".$this->school."&docenten%5B%5D=".urlencode($second);
+					return "https://publish.gepro-osi.nl/roosters/rooster.php?type=Docentrooster&wijzigingen=1&school=".$this->school."&docenten%5B%5D=".urlencode($second);
 				}else{
 					throw new Exception("getUrl needs more parameters.", 1);
 				}
 			}else if(strtolower($type) == "lokaal"){
 				if($second !== false){
 					// Second = room id
-					return "http://roosters5.gepro-osi.nl/roosters/rooster.php?type=Lokaalrooster&wijzigingen=1&school=".$this->school."&lokalen%5B%5D=".urlencode($second);
+					return "https://publish.gepro-osi.nl/roosters/rooster.php?type=Lokaalrooster&wijzigingen=1&school=".$this->school."&lokalen%5B%5D=".urlencode($second);
 				}else{
 					throw new Exception("getUrl needs more parameters.", 1);	
 				}
@@ -159,13 +169,13 @@ class rooster{
 	}
 
 	public function getName($url){
-		$html = file_get_html($url);
+		$html = $this->file_get_html($url);
 		$naam = $html->find('.lNameHeader');
 		return $this->getNameSchedule($naam[0]->plaintext);
 	}
 
 	public function getSchedule($url){
-		$html = file_get_html($url);
+		$html = $this->file_get_html($url);
 		$roostertable = $html->find('tr td[class=tableCell] table');
 
 		$table = array();
